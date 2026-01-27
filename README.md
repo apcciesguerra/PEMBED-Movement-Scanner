@@ -1,4 +1,4 @@
-# PEMBED-Movement-Scanner
+# Intruder Alert! - Movement Scanner
 Arduino Movement Scanner Activity for PEMBED Class
 
 Instructions
