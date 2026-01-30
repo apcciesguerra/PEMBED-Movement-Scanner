@@ -4,12 +4,12 @@
 // ---------------------------------------------------------------------------
 // 1. WIFI CONFIGURATION
 // ---------------------------------------------------------------------------
-const char ssid[] = "jmm";        // Change your network SSID
-const char pass[] = "Bruhbruhhuhh";    // Change your network password
+const char ssid[] = "ComLab314";        // Change your network SSID
+const char pass[] = "#Ramswifi";    // Change your network password
 
 // 2. SERVER CONFIGURATION
 // IMPORTANT: Use your computer's local IP address (e.g., 192.168.1.5), NOT "localhost"
-IPAddress server(192, 168, 1, 13); 
+IPAddress server(192, 168, 35, 246); 
 const int port = 80;
 
 WiFiClient client;
@@ -24,7 +24,7 @@ const int ledPin = 12;
 
 const int ALERT_DISTANCE = 30; // Threshold in cm
 unsigned long lastSendTime = 0;
-const long interval = 1000;    // Send data every 1 second
+const long interval = 500;    // Send data every 1 second
 
 // ---------------------------------------------------------------------------
 // SETUP
@@ -88,25 +88,33 @@ void loop() {
 
   // 2. Handle Alert
   if (distance > 0 && distance < ALERT_DISTANCE) {
-    digitalWrite(buzzerPin, HIGH);
+    // Gamit tayo ng tone() para sure na tutunog kahit Passive Buzzer
+    tone(buzzerPin, 4000); 
     digitalWrite(ledPin, HIGH);
     alert = true;
   } else {
-    digitalWrite(buzzerPin, LOW);
+    // Patayin ang tone
+    noTone(buzzerPin);     
     digitalWrite(ledPin, LOW);
     alert = false;
   }
 
-  // 3. Send Data to Server (Throttled)
+// 3. Send Data to Server (Throttled)
   if (millis() - lastSendTime > interval) {
     lastSendTime = millis();
-    sendDataToServer(distance, alert);
     
-    // Also output to Serial for debugging as requested
-    Serial.print("Dist: ");
-    Serial.print(distance);
-    Serial.print(" cm | Alert: ");
-    Serial.println(alert ? "YES" : "NO");
+    // ETO YUNG FIX: Check muna kung valid ang distance
+    // Kapag 0 o kaya lampas 400 (depende sa sensor, minsan 999 ang error), WAG i-send.
+    if (distance > 0 && distance < 400) { 
+        sendDataToServer(distance, alert);
+        
+        Serial.print("Dist: ");
+        Serial.print(distance);
+        Serial.print(" cm | Alert: ");
+        Serial.println(alert ? "YES" : "NO");
+    } else {
+        Serial.println("Error reading (Ignored)");
+    }
   }
 }
 
@@ -122,14 +130,12 @@ void sendDataToServer(float dist, bool alert) {
 
     // Send HTTP POST Request
     client.println("POST /movement_scanner/api.php HTTP/1.1");
-    //client.print("Host: "); client.println(server); // Sometimes needed
+    client.print("Host: "); client.println(server); // Sometimes needed
     client.println("Content-Type: application/x-www-form-urlencoded");
     client.print("Content-Length: ");
     client.println(postData.length());
     client.println();
     client.print(postData);
-    
-    // Wait for response (optional, can be blocking)
     /*
     while(client.connected() || client.available()) {
       if(client.available()) { 
