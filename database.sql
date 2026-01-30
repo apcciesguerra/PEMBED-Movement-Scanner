@@ -1,0 +1,9 @@
+CREATE DATABASE IF NOT EXISTS movement_scanner;
+USE movement_scanner;
+
+CREATE TABLE IF NOT EXISTS readings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    distance FLOAT NOT NULL,
+    alert_triggered BOOLEAN NOT NULL DEFAULT 0,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
