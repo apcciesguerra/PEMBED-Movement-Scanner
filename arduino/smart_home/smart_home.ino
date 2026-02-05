@@ -1,4 +1,4 @@
-// Movement Scanner ONLY - Arduino Code (Uno R4 WiFi)
+// Smart Home ONLY - Arduino Code (Uno R4 WiFi)
 #include <WiFiS3.h> // Use WiFiS3 for Uno R4 WiFi
 
 // ---------------------------------------------------------------------------
@@ -44,11 +44,11 @@ void setup() {
   printWifiStatus();
 
   // Initialize Modules
-  setupScanner();
+  setupSmartHome();
 }
 
 void loop() {
-  runScanner();
+  runSmartHome();
 }
 
 void printWifiStatus() {

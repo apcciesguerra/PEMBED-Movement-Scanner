@@ -29,6 +29,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode($data);
         exit;
     }
+
+    if ($action === 'get_states') {
+        $stmt = $pdo->query("SELECT * FROM smart_home_state WHERE id = 1");
+        $data = $stmt->fetch();
+        echo json_encode($data ?: ['red_state' => 0, 'green_state' => 0, 'yellow_state' => 0, 'motor_speed' => 0]);
+        exit;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($action === 'set_state') {
+        $red = isset($_POST['red']) ? (int) $_POST['red'] : null;
+        $green = isset($_POST['green']) ? (int) $_POST['green'] : null;
+        $yellow = isset($_POST['yellow']) ? (int) $_POST['yellow'] : null;
+        $motor = isset($_POST['motor']) ? (int) $_POST['motor'] : null;
+
+        if ($red !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET red_state = ? WHERE id = 1");
+            $stmt->execute([$red]);
+        }
+        if ($green !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET green_state = ? WHERE id = 1");
+            $stmt->execute([$green]);
+        }
+        if ($yellow !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET yellow_state = ? WHERE id = 1");
+            $stmt->execute([$yellow]);
+        }
+
+        if ($motor !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET motor_speed = ? WHERE id = 1");
+            $stmt->execute([$motor]);
+        }
+
+        echo json_encode(['status' => 'success']);
+        exit;
+    }
 }
 
 echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
