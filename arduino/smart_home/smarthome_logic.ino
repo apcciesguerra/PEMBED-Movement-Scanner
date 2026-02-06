@@ -12,7 +12,7 @@ const int motorIn1 = 4;
 const int motorIn2 = 5;
 
 unsigned long lastSmartHomeCheckTime = 0;
-const long smartHomeInterval = 2000; // Check state every 2 seconds
+const long smartHomeInterval = 500; // Check state every 2 seconds
 
 void setupSmartHome() {
   pinMode(redPin, OUTPUT);
