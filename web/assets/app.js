@@ -36,6 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const redToggle = document.getElementById('red-toggle');
     const greenToggle = document.getElementById('green-toggle');
     const yellowToggle = document.getElementById('yellow-toggle');
+    const redBrightness = document.getElementById('red-brightness');
+    const greenBrightness = document.getElementById('green-brightness');
+    const yellowBrightness = document.getElementById('yellow-brightness');
+    const redBrightnessValue = document.getElementById('red-brightness-value');
+    const greenBrightnessValue = document.getElementById('green-brightness-value');
+    const yellowBrightnessValue = document.getElementById('yellow-brightness-value');
     const motorSlider = document.getElementById('motor-slider');
 
     if (redToggle) {
@@ -46,6 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (yellowToggle) {
         yellowToggle.addEventListener('change', (e) => updateSmartHomeState({ yellow: e.target.checked ? 1 : 0 }));
+    }
+
+    if (redBrightness) {
+        redBrightness.addEventListener('input', (e) => {
+            if (redBrightnessValue) redBrightnessValue.textContent = e.target.value;
+        });
+        redBrightness.addEventListener('change', (e) => {
+            updateSmartHomeState({ red_brightness: e.target.value });
+        });
+    }
+
+    if (greenBrightness) {
+        greenBrightness.addEventListener('input', (e) => {
+            if (greenBrightnessValue) greenBrightnessValue.textContent = e.target.value;
+        });
+        greenBrightness.addEventListener('change', (e) => {
+            updateSmartHomeState({ green_brightness: e.target.value });
+        });
+    }
+
+    if (yellowBrightness) {
+        yellowBrightness.addEventListener('input', (e) => {
+            if (yellowBrightnessValue) yellowBrightnessValue.textContent = e.target.value;
+        });
+        yellowBrightness.addEventListener('change', (e) => {
+            updateSmartHomeState({ yellow_brightness: e.target.value });
+        });
     }
 
     if (motorSlider) {
@@ -157,12 +190,37 @@ function updateSmartHomeUI(data) {
     const redToggle = document.getElementById('red-toggle');
     const greenToggle = document.getElementById('green-toggle');
     const yellowToggle = document.getElementById('yellow-toggle');
+    const redBrightness = document.getElementById('red-brightness');
+    const greenBrightness = document.getElementById('green-brightness');
+    const yellowBrightness = document.getElementById('yellow-brightness');
+    const redBrightnessValue = document.getElementById('red-brightness-value');
+    const greenBrightnessValue = document.getElementById('green-brightness-value');
+    const yellowBrightnessValue = document.getElementById('yellow-brightness-value');
     const motorSlider = document.getElementById('motor-slider');
     const motorValue = document.getElementById('motor-value');
 
     if (redToggle) redToggle.checked = parseInt(data.red_state) === 1;
     if (greenToggle) greenToggle.checked = parseInt(data.green_state) === 1;
     if (yellowToggle) yellowToggle.checked = parseInt(data.yellow_state) === 1;
+
+    const redBrightnessVal = data.red_brightness !== undefined ? parseInt(data.red_brightness) : 255;
+    const greenBrightnessVal = data.green_brightness !== undefined ? parseInt(data.green_brightness) : 255;
+    const yellowBrightnessVal = data.yellow_brightness !== undefined ? parseInt(data.yellow_brightness) : 255;
+
+    if (redBrightness && document.activeElement !== redBrightness) {
+        redBrightness.value = redBrightnessVal;
+        if (redBrightnessValue) redBrightnessValue.textContent = redBrightnessVal;
+    }
+
+    if (greenBrightness && document.activeElement !== greenBrightness) {
+        greenBrightness.value = greenBrightnessVal;
+        if (greenBrightnessValue) greenBrightnessValue.textContent = greenBrightnessVal;
+    }
+
+    if (yellowBrightness && document.activeElement !== yellowBrightness) {
+        yellowBrightness.value = yellowBrightnessVal;
+        if (yellowBrightnessValue) yellowBrightnessValue.textContent = yellowBrightnessVal;
+    }
 
     if (motorSlider && document.activeElement !== motorSlider) {
         motorSlider.value = parseInt(data.motor_speed);

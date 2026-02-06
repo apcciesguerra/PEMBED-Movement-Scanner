@@ -33,7 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'get_states') {
         $stmt = $pdo->query("SELECT * FROM smart_home_state WHERE id = 1");
         $data = $stmt->fetch();
-        echo json_encode($data ?: ['red_state' => 0, 'green_state' => 0, 'yellow_state' => 0, 'motor_speed' => 0]);
+        echo json_encode($data ?: [
+            'red_state' => 0,
+            'green_state' => 0,
+            'yellow_state' => 0,
+            'red_brightness' => 255,
+            'green_brightness' => 255,
+            'yellow_brightness' => 255,
+            'motor_speed' => 0
+        ]);
         exit;
     }
 }
@@ -43,6 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $red = isset($_POST['red']) ? (int) $_POST['red'] : null;
         $green = isset($_POST['green']) ? (int) $_POST['green'] : null;
         $yellow = isset($_POST['yellow']) ? (int) $_POST['yellow'] : null;
+        $redBrightness = isset($_POST['red_brightness']) ? (int) $_POST['red_brightness'] : null;
+        $greenBrightness = isset($_POST['green_brightness']) ? (int) $_POST['green_brightness'] : null;
+        $yellowBrightness = isset($_POST['yellow_brightness']) ? (int) $_POST['yellow_brightness'] : null;
         $motor = isset($_POST['motor']) ? (int) $_POST['motor'] : null;
 
         if ($red !== null) {
@@ -56,6 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($yellow !== null) {
             $stmt = $pdo->prepare("UPDATE smart_home_state SET yellow_state = ? WHERE id = 1");
             $stmt->execute([$yellow]);
+        }
+        if ($redBrightness !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET red_brightness = ? WHERE id = 1");
+            $stmt->execute([$redBrightness]);
+        }
+        if ($greenBrightness !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET green_brightness = ? WHERE id = 1");
+            $stmt->execute([$greenBrightness]);
+        }
+        if ($yellowBrightness !== null) {
+            $stmt = $pdo->prepare("UPDATE smart_home_state SET yellow_brightness = ? WHERE id = 1");
+            $stmt->execute([$yellowBrightness]);
         }
 
         if ($motor !== null) {

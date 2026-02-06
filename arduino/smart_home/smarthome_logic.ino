@@ -3,9 +3,9 @@
 // ---------------------------------------------------------------------------
 
 // Pin Definitions
-const int redPin = 6;       // Red LED
-const int greenPin = 7;     // Green LED
-const int yellowPin = 8;    // Yellow LED
+const int redPin = 6;       // Red LED (PWM)
+const int greenPin = 9;     // Green LED (PWM)
+const int yellowPin = 10;   // Yellow LED (PWM)
 
 const int motorEnablePin = 3; 
 const int motorIn1 = 4;
@@ -24,9 +24,9 @@ void setupSmartHome() {
   pinMode(motorIn2, OUTPUT);
 
   // Initialize
-  digitalWrite(redPin, LOW);
-  digitalWrite(greenPin, LOW);
-  digitalWrite(yellowPin, LOW);
+  analogWrite(redPin, 0);
+  analogWrite(greenPin, 0);
+  analogWrite(yellowPin, 0);
   
   digitalWrite(motorIn1, LOW);
   digitalWrite(motorIn2, LOW);
@@ -127,6 +127,9 @@ void parseStateAndApply(String json) {
   int greenIndex = json.indexOf("green_state");
   int yellowIndex = json.indexOf("yellow_state");
   int motorIndex = json.indexOf("motor_speed");
+  int redBrightnessIndex = json.indexOf("red_brightness");
+  int greenBrightnessIndex = json.indexOf("green_brightness");
+  int yellowBrightnessIndex = json.indexOf("yellow_brightness");
   
   // Debug kung nahanap ba ang keys
   if (redIndex == -1) Serial.println("[DEBUG] Error: 'red_state' not found");
@@ -137,11 +140,18 @@ void parseStateAndApply(String json) {
     int greenVal = findFirstDigit(json, greenIndex);
     int yellowVal = findFirstDigit(json, yellowIndex);
     int motorVal = findFirstNumber(json, motorIndex);
+    int redBrightness = (redBrightnessIndex != -1) ? findFirstNumber(json, redBrightnessIndex) : 255;
+    int greenBrightness = (greenBrightnessIndex != -1) ? findFirstNumber(json, greenBrightnessIndex) : 255;
+    int yellowBrightness = (yellowBrightnessIndex != -1) ? findFirstNumber(json, yellowBrightnessIndex) : 255;
+
+    redBrightness = constrain(redBrightness, 0, 255);
+    greenBrightness = constrain(greenBrightness, 0, 255);
+    yellowBrightness = constrain(yellowBrightness, 0, 255);
 
     // Apply
-    digitalWrite(redPin, redVal == 1 ? HIGH : LOW);
-    digitalWrite(greenPin, greenVal == 1 ? HIGH : LOW);
-    digitalWrite(yellowPin, yellowVal == 1 ? HIGH : LOW);
+    analogWrite(redPin, redVal == 1 ? redBrightness : 0);
+    analogWrite(greenPin, greenVal == 1 ? greenBrightness : 0);
+    analogWrite(yellowPin, yellowVal == 1 ? yellowBrightness : 0);
     
     // Motor
     if(motorVal > 0) {
@@ -161,7 +171,13 @@ void parseStateAndApply(String json) {
     Serial.print(" Y:");
     Serial.print(yellowVal);
     Serial.print(" Motor:");
-    Serial.println(motorVal);
+    Serial.print(motorVal);
+    Serial.print(" | Brightness R:");
+    Serial.print(redBrightness);
+    Serial.print(" G:");
+    Serial.print(greenBrightness);
+    Serial.print(" Y:");
+    Serial.println(yellowBrightness);
   } else {
     Serial.println("[DEBUG] ERROR: JSON Parsing failed (incomplete keys).");
   }

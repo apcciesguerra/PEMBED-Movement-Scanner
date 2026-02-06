@@ -13,7 +13,11 @@ CREATE TABLE IF NOT EXISTS smart_home_state (
     red_state BOOLEAN DEFAULT 0,
     green_state BOOLEAN DEFAULT 0,
     yellow_state BOOLEAN DEFAULT 0,
+    red_brightness INT DEFAULT 255,
+    green_brightness INT DEFAULT 255,
+    yellow_brightness INT DEFAULT 255,
     motor_speed INT DEFAULT 0
 );
 
-INSERT IGNORE INTO smart_home_state (id, red_state, green_state, yellow_state, motor_speed) VALUES (1, 0, 0, 0, 0);
+INSERT IGNORE INTO smart_home_state (id, red_state, green_state, yellow_state, red_brightness, green_brightness, yellow_brightness, motor_speed)
+VALUES (1, 0, 0, 0, 255, 255, 255, 0);
