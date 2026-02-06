@@ -41,12 +41,23 @@ void runSmartHome() {
     fetchSmartHomeState();
   }
 }
-
 void fetchSmartHomeState() {
+  Serial.println("\n--- [DEBUG] START FETCH ---");
+  Serial.print("[DEBUG] Target IP: ");
+  Serial.println(server);
+
   if (client.connect(server, port)) {
-    // Serial.println("Checking Smart Home State...");
+    Serial.println("[DEBUG] Connected to server! Sending GET request...");
+
+    // IMPORTANT: Check mo kung tama itong path. 
+    // Kung nasa htdocs/PEMBED-Movement-Scanner/web ka, ito dapat:
+    String url = "/PEMBED-Movement-Scanner/web/api.php?action=get_states";
     
-    client.println("GET /movement_scanner/api.php?action=get_states HTTP/1.1");
+    // Kung binago mo folder name, palitan mo yung string sa taas ^
+    
+    client.print("GET ");
+    client.print(url);
+    client.println(" HTTP/1.1");
     client.print("Host: "); client.println(server);
     client.println("Connection: close");
     client.println();
@@ -54,35 +65,72 @@ void fetchSmartHomeState() {
     // Read Response
     bool headersEnded = false;
     String responseBody = "";
+    bool receivedData = false;
+    
+    // Timeout counter para di mag-hang
+    unsigned long timeout = millis();
     
     while(client.connected() || client.available()) {
+      if (millis() - timeout > 5000) {
+        Serial.println("[DEBUG] ERROR: Server timed out!");
+        client.stop();
+        return;
+      }
+
       if(client.available()) {
         String line = client.readStringUntil('\n');
+        
+        // Print mo yung pinaka-unang line ng response (Dapat HTTP/1.1 200 OK)
+        if (!receivedData) {
+            Serial.print("[DEBUG] Server Status: ");
+            Serial.println(line); 
+            receivedData = true;
+        }
+
+        // Detect end of headers
         if (line == "\r") {
           headersEnded = true;
           continue;
         }
+        
+        // Save the body (JSON)
         if (headersEnded) {
           responseBody += line;
         }
       }
     }
     client.stop();
-    
-    // Parse JSON
-    parseStateAndApply(responseBody);
+    Serial.println("[DEBUG] Connection closed.");
+
+    // Dito mo makikita kung ano talaga nare-receive niya
+    Serial.println("[DEBUG] RAW BODY RECEIVED:");
+    Serial.println("------------------------------------------------");
+    Serial.println(responseBody);
+    Serial.println("------------------------------------------------");
+
+    if (responseBody.length() > 0) {
+        parseStateAndApply(responseBody);
+    } else {
+        Serial.println("[DEBUG] ERROR: Body is empty! Baka mali ang URL o walang nireturn ang PHP.");
+    }
     
   } else {
-    Serial.println("Connection to server failed (SmartHome)");
+    Serial.println("[DEBUG] CONNECTION FAILED! Check IP Address or Firewall.");
   }
 }
 
 void parseStateAndApply(String json) {
+  Serial.println("[DEBUG] Parsing Data...");
+  
   // Parsing "red_state":1, "green_state":0, etc.
   int redIndex = json.indexOf("red_state");
   int greenIndex = json.indexOf("green_state");
   int yellowIndex = json.indexOf("yellow_state");
   int motorIndex = json.indexOf("motor_speed");
+  
+  // Debug kung nahanap ba ang keys
+  if (redIndex == -1) Serial.println("[DEBUG] Error: 'red_state' not found");
+  if (greenIndex == -1) Serial.println("[DEBUG] Error: 'green_state' not found");
   
   if(redIndex != -1 && greenIndex != -1 && yellowIndex != -1 && motorIndex != -1) {
     int redVal = findFirstDigit(json, redIndex);
@@ -106,7 +154,7 @@ void parseStateAndApply(String json) {
         analogWrite(motorEnablePin, 0);
     }
     
-    Serial.print("SmartHome -> R:");
+    Serial.print("[DEBUG] APPLIED STATE -> R:");
     Serial.print(redVal);
     Serial.print(" G:");
     Serial.print(greenVal);
@@ -114,6 +162,8 @@ void parseStateAndApply(String json) {
     Serial.print(yellowVal);
     Serial.print(" Motor:");
     Serial.println(motorVal);
+  } else {
+    Serial.println("[DEBUG] ERROR: JSON Parsing failed (incomplete keys).");
   }
 }
 
@@ -141,3 +191,4 @@ int findFirstNumber(String str, int startIndex) {
     }
     return numStr.toInt();
 }
+

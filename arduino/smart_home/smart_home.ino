@@ -9,7 +9,7 @@ const char pass[] = "#Ramswifi";    // Change your network password
 
 // 2. SERVER CONFIGURATION
 // IMPORTANT: Use your computer's local IP address (e.g., 192.168.1.5), NOT "localhost"
-IPAddress server(192, 168, 35, 246); 
+IPAddress server(192, 168, 35, 168); 
 const int port = 80;
 
 WiFiClient client; // Shared WiFi Client
